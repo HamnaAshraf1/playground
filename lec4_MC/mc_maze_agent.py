@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+
+#https://www.gymlibrary.dev/environments/toy_text/frozen_lake/
+
 import numpy as np
 
 class Agent:
@@ -15,7 +18,7 @@ class Agent:
 
     '''@brief Runs the Incremental Off-policy Monte Carlo Algorithm with Importance Sampling
     '''
-    def run_MC(self, num_episodes):
+    def run_MC(self, num_episodes): 
         for episode in range(num_episodes):
             if episode % 10000 == 0:
                 print("Episode: %d"%episode)
@@ -23,9 +26,9 @@ class Agent:
             # Generate an episode
             episode_states, episode_actions, episode_rewards = self.generate_episode()
 
-            self.update_value_fn(episode_states, episode_actions, episode_rewards)
+            self.update_value_fn(episode_states, episode_actions, episode_rewards) #back tracking through the episode
             
-            self.update_greedy_policy()
+            self.update_greedy_policy() #updating policy -> doing control (if not update policy then evaluation)
 
         return self.Q, self.pi
 
@@ -42,7 +45,7 @@ class Agent:
             action = np.random.choice(range(self.num_actions), p=self.behavior_policy[state])
 
             # take a step
-            next_state, reward, done, _, _ = self.env.step(action)
+            next_state, reward, done, _, _ = self.env.step(action) 
             episode_states.append(state)
             episode_actions.append(action)
             episode_rewards.append(reward)
@@ -57,19 +60,19 @@ class Agent:
         W = 1  # Initialize the importance sampling ratio
 
         # Loop over the episode in reverse order
-        for t in range(len(episode_states) - 1, -1, -1):
+        for t in range(len(episode_states) - 1, -1, -1): #going backwards 
             state = episode_states[t]
             action = episode_actions[t]
             reward = episode_rewards[t]
-            q = self.get_action_value(state, action)
             c = self.get_cum_sum_weights(state, action)
+            q = self.get_action_value(state, action)
             G, q, c = self.policy_evaluation(G, q, c, W, reward)
             # Update stage
             self.update_action_value(state, action, q)
             self.update_cum_sum_weights(state, action, c)
             self.update_greedy_policy()
             if action != self.pi[state]:  # If the action was not taken by the target policy
-                break
+                break #early break 
             W /= self.query_behavior_policy_action(state, action)  # Update the importance sampling ratio
 
     '''@brief Evaluate the return and action-value

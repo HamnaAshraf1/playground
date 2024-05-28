@@ -21,7 +21,7 @@ def simulate_episodes(agent, num_episodes=3):
         state, _ = env2.reset()
         env2.render()
         while not done:
-            # Random choice from behavior policy
+            # Taking the greedy action
             action = int(agent.pi[state])
             # take a step
             env2.render()
@@ -36,7 +36,7 @@ def main():
     NUM_EPISODES = 50000
 
     # Define the Blackjack environment
-    env = gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=False)
+    env = gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=False) #prof showed diff when changed to True
     
     # Define the behavior policy (random policy for exploration)
     behavior_policy = np.ones((env.observation_space.n, env.action_space.n)) / env.action_space.n
